@@ -1,6 +1,6 @@
 // เก็บไฟล์แอปไว้ในเครื่องเพื่อใช้ออฟไลน์
 // เปลี่ยน VERSION ทุกครั้งที่อัปเดตแอป
-const VERSION = 'v1-a3';
+const VERSION = 'v1-b1';
 const CACHE = 'gut-log-' + VERSION;
 const FILES = [
   './',
@@ -26,7 +26,9 @@ const FILES = [
   'js/ui.js',
   'js/sample.js',
   'js/screens/today.js',
-  'js/screens/log.js'
+  'js/screens/log.js',
+  'js/screens/history.js',
+  'js/screens/day.js'
 ];
 
 self.addEventListener('install', (e) => {

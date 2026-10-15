@@ -247,6 +247,67 @@ h1, h2 { line-height: 1.4; }
 
 .toast { position: fixed; left: 50%; transform: translateX(-50%); top: calc(var(--safe-top) + 12px); z-index: 60; background: var(--text); color: #FFFFFF; padding: 10px 16px; border-radius: 14px; font-size: 15px; width: max-content; max-width: calc(100% - 40px); text-align: center; }
 
+/* ---------- ประวัติ ---------- */
+.history { gap: 16px; }
+.history-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.month-nav { display: flex; align-items: center; gap: 4px; }
+.month-label { min-width: 108px; text-align: center; font-size: 16px; font-weight: 500; }
+.round-btn { width: 44px; height: 44px; flex-shrink: 0; border: 1px solid var(--line); border-radius: 50%; background: #FFFFFF; color: var(--text); display: flex; align-items: center; justify-content: center; padding: 0; }
+.round-btn:disabled { color: var(--muted); opacity: 0.5; }
+.calendar { border-radius: 22px; padding: 12px 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal-week { font-size: 12px; color: var(--text-2); text-align: center; }
+.cal-cell { position: relative; min-height: 58px; padding: 4px 0 6px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 3px; background: transparent; border: 2px solid transparent; }
+.cal-cell.blank { visibility: hidden; }
+.cal-cell.sel { border-color: var(--accent); }
+.cal-cell.today { border: 1px dashed var(--zone-ring); }
+.cal-cell:disabled { cursor: default; }
+.cal-num { font-size: 13px; color: var(--text); }
+.cal-cell.today .cal-num, .cal-cell.sel .cal-num { font-weight: 600; }
+.cal-cell:disabled .cal-num { color: var(--muted); }
+.cal-pill { width: 30px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--muted); }
+.cal-pill.filled { font-weight: 600; color: var(--text); }
+.cal-pill.neutral { background: #EFEAE0; }
+.cal-pill.empty { border: 1px dashed #D6CFBF; }
+.cal-dot { position: absolute; top: 5px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--alert-dot); }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 8px 6px 0; border-top: 1px solid var(--line-soft); font-size: 12px; color: var(--text-2); }
+.cal-legend span { display: flex; align-items: center; gap: 5px; }
+.cal-legend i { width: 14px; height: 14px; border-radius: 5px; display: inline-block; }
+.cal-legend i.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--alert-dot); }
+.month-sum { display: flex; gap: 8px; font-size: 14px; }
+.month-sum .card { flex: 1; border-radius: 14px; padding: 8px 10px; text-align: center; }
+.day-card { display: flex; flex-direction: column; gap: 8px; background: #FFFFFF; border: 1.5px solid var(--accent); border-radius: 20px; padding: 14px 16px; text-decoration: none; color: var(--text); }
+.day-card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.day-card-title { font-size: 16px; font-weight: 600; }
+.day-card-link { display: flex; align-items: center; gap: 2px; font-size: 14px; color: var(--accent-dark); font-weight: 500; }
+.day-card-sub { font-size: 14px; color: var(--text-2); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.mini-tag { font-size: 13px; padding: 3px 10px; border-radius: 999px; background: var(--symptom-bg); }
+.mini-tag.green { background: var(--accent-soft); }
+
+/* ---------- รายละเอียดวัน ---------- */
+.day-page { padding-top: calc(var(--safe-top) + 12px); padding-bottom: calc(var(--nav-pad-bottom) + 40px); }
+.back-link { align-self: flex-start; min-height: 44px; display: flex; align-items: center; gap: 2px; font-size: 16px; color: var(--accent-dark); background: none; border: none; padding: 0; margin-left: -6px; }
+.h1-day { font-size: 28px; font-weight: 600; line-height: 1.4; }
+.sym-pill { padding: 8px 14px; border-radius: 999px; background: var(--accent-soft); font-size: 15px; }
+.text-btn { min-height: 44px; padding: 0 4px; border: none; background: transparent; font-size: 15px; color: var(--accent-dark); font-weight: 500; }
+.factor-table { padding: 4px 16px; }
+.ft-row { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; }
+.ft-row + .ft-row { border-top: 1px solid var(--line-soft); }
+.ft-label { font-size: 15px; color: var(--text-2); flex-shrink: 0; }
+.ft-value { font-size: 15px; font-weight: 500; text-align: right; }
+.entry-card { border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.entry-card-head { display: flex; align-items: center; gap: 14px; }
+.entry-icon.big { width: 52px; height: 52px; border-radius: 16px; }
+.entry-card-title { font-size: 17px; font-weight: 600; }
+.pain-bar { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 3px; }
+.pain-bar span { height: 8px; border-radius: 4px; }
+.entry-more { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
+.entry-more div { display: flex; gap: 10px; font-size: 14px; }
+.entry-more div span:first-child { width: 72px; color: var(--text-2); flex-shrink: 0; }
+.add-back { display: flex; gap: 10px; }
+.dash-btn { height: 56px; border: 1.5px dashed #A9B9AD; border-radius: 18px; background: transparent; color: var(--accent-dark); font-size: 16px; font-weight: 500; }
+
 .placeholder { padding: 20px; text-align: center; color: var(--text-2); font-size: 15px; }
 .dev-tools { display: flex; flex-direction: column; gap: 10px; }
 

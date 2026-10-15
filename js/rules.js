@@ -132,3 +132,48 @@ export function entrySub(e) {
 export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
+
+// ---------- ประวัติ ----------
+// Bristol ที่ "ห่างจากปกติมากที่สุด" ของวัน (ใช้กับสีปฏิทิน)
+export function dayRepType(entries) {
+  let best = null;
+  entries.forEach((e) => {
+    if (e.kind !== 'bowel' || !e.bristol) return;
+    if (best === null || Math.abs(e.bristol - 4) > Math.abs(best - 4)) best = e.bristol;
+  });
+  return best;
+}
+
+export const factorLabel = (key, value) => {
+  const opt = (FACTORS[key].opts || []).find(([k]) => k === value);
+  return opt ? opt[1] : null;
+};
+
+export function mealsText(day) {
+  if (day.riskMeals === null || day.riskMeals === undefined) return null;
+  return day.riskMeals === 0 ? 'ไม่มี' : day.riskMeals + ' มื้อ';
+}
+
+// ป้ายปัจจัยที่น่าสังเกต (การ์ดในหน้าประวัติ)
+export function factorTags(day) {
+  if (!day || !day.submittedAt) return [];
+  const tags = [];
+  if (day.sleep === 'low') tags.push('นอนน้อย');
+  if (day.stress === 'high') tags.push('เครียดสูง');
+  else if (day.stress === 'mid') tags.push('เครียดกลาง');
+  if (day.period === 'light') tags.push('ประจำเดือนมาน้อย');
+  else if (day.period === 'heavy') tags.push('ประจำเดือนมามาก');
+  if ((day.riskFoods || []).length) tags.push('อาหารเสี่ยง: ' + day.riskFoods.join(', '));
+  else if (day.riskMeals > 0) tags.push('อาหารเสี่ยง ' + day.riskMeals + ' มื้อ');
+  return tags;
+}
+
+export const thYear = (y) => y + 543;
+export function thLongDate(date) {
+  const d = parseLocal(date);
+  return TH_DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + TH_MONTHS[d.getMonth()];
+}
+export function thShortDate(date) {
+  const d = parseLocal(date);
+  return TH_DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + TH_MONTHS_SHORT[d.getMonth()];
+}

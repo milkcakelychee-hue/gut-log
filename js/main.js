@@ -3,6 +3,8 @@ import { init, useStore, replaceData, wipeAll } from './store.js';
 import { Nav, Confirm, Toast } from './ui.js';
 import { Today } from './screens/today.js';
 import { LogSheet } from './screens/log.js';
+import { History } from './screens/history.js';
+import { Day } from './screens/day.js';
 import { makeSample } from './sample.js';
 
 function useRoute() {
@@ -75,7 +77,8 @@ function App() {
 
   let screen;
   switch (route[0]) {
-    case 'history': screen = html`<${Placeholder} title="History" tab="history" phase="ข" />`; break;
+    case 'history': screen = html`<${History} />`; break;
+    case 'day': screen = html`<${Day} key=${route[1]} date=${route[1]} onLog=${openLog} />`; break;
     case 'trends': screen = html`<${Placeholder} title="Trends" tab="trends" phase="ค" />`; break;
     case 'settings': screen = html`<${SettingsTemp} toast=${setToastText} />`; break;
     default: screen = html`<${Today} onLog=${openLog} />`;
