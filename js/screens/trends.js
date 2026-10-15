@@ -171,7 +171,7 @@ const LEVEL_COLOR = {
   stress: { low: '#C9DFCC', mid: '#F1E3C8', high: '#EBC2AC' }
 };
 
-function FactorSummary({ days }) {
+export function FactorSummary({ days }) {
   const f = factorSummary(days);
   const rows = itemsOf('factor').map((r) => r.key);
   const dist = (key) => {

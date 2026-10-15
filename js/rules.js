@@ -168,7 +168,9 @@ export function factorTags(day) {
   return tags;
 }
 
-export const thYear = (y) => y + 543;
+// ค่าตั้งค่าที่กติกาต้องใช้ (store อัปเดตให้)
+export const prefs = { be: true };
+export const thYear = (y) => (prefs.be ? y + 543 : y);
 export function thLongDate(date) {
   const d = parseLocal(date);
   return TH_DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + TH_MONTHS[d.getMonth()];

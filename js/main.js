@@ -1,12 +1,14 @@
 import { html, render, useState, useEffect } from './vendor/preact-htm.js';
-import { init, useStore, replaceData, wipeAll } from './store.js';
-import { Nav, Confirm, Toast } from './ui.js';
+import { init, useStore } from './store.js';
+import { Toast } from './ui.js';
 import { Today } from './screens/today.js';
 import { LogSheet } from './screens/log.js';
 import { History } from './screens/history.js';
 import { Day } from './screens/day.js';
 import { Trends } from './screens/trends.js';
-import { makeSample } from './sample.js';
+import { Settings } from './screens/settings.js';
+import { Manage } from './screens/manage.js';
+import { Report } from './screens/report.js';
 
 function useRoute() {
   const read = () => (location.hash.replace(/^#\/?/, '') || 'today').split('/');
@@ -29,44 +31,6 @@ function useRefreshOnWake() {
   }, []);
 }
 
-function Placeholder({ title, tab, phase }) {
-  return html`
-    <main class="page has-nav">
-      <h1 class="h1-sm">${title}</h1>
-      <div class="card placeholder">หน้านี้จะมาในช่วง (${phase})</div>
-    </main>
-    <div class="bottom"><${Nav} active=${tab} /></div>`;
-}
-
-function SettingsTemp({ toast }) {
-  const [ask, setAsk] = useState(null);
-  return html`
-    <main class="page has-nav">
-      <h1 class="h1-sm">Settings</h1>
-      <div class="card placeholder">หน้าตั้งค่าจะมาในช่วง (ง)</div>
-      <section class="section">
-        <h2 class="h2" style="font-size: 14px; font-weight: 500; color: #5C675F; margin: 0 4px">สำหรับทดลอง (ช่วงพัฒนา)</h2>
-        <div class="dev-tools">
-          <button type="button" class="btn-plain" onClick=${() => setAsk('sample')}>ใส่ข้อมูลตัวอย่าง 30 วันย้อนหลัง</button>
-          <button type="button" class="btn-plain" style="color: #A0553A" onClick=${() => setAsk('wipe')}>ล้างข้อมูลทั้งหมด</button>
-        </div>
-      </section>
-    </main>
-    <div class="bottom"><${Nav} active="settings" /></div>
-    ${ask === 'sample' && html`<${Confirm} title="ใส่ข้อมูลตัวอย่าง?" message="จะเพิ่มบันทึกสุ่มย้อนหลัง 30 วัน ไม่แตะวันนี้ จึงยังไม่เห็นในหน้าวันนี้ จะเห็นในหน้าประวัติและแนวโน้ม (ช่วง ข และ ค)"
-      confirmLabel="ใส่ข้อมูล" onCancel=${() => setAsk(null)}
-      onConfirm=${async () => {
-        const data = makeSample();
-        await replaceData(data);
-        setAsk(null);
-        toast('เพิ่มข้อมูล ' + data.days.length + ' วันย้อนหลังแล้ว (' + data.entries.length + ' บันทึก) · จะเห็นในหน้าประวัติ');
-      }} />`}
-    ${ask === 'wipe' && html`<${Confirm} title="ล้างข้อมูลทั้งหมด?" message="บันทึก ปัจจัย และรายการที่เพิ่มเองจะหายทั้งหมด กู้คืนไม่ได้"
-      confirmLabel="ล้างทั้งหมด" danger onCancel=${() => setAsk(null)}
-      onConfirm=${async () => { await wipeAll(); setAsk(null); toast('ล้างข้อมูลแล้ว'); }} />`}
-  `;
-}
-
 function App() {
   const s = useStore();
   const route = useRoute();
@@ -81,8 +45,10 @@ function App() {
     case 'history': screen = html`<${History} />`; break;
     case 'day': screen = html`<${Day} key=${route[1]} date=${route[1]} onLog=${openLog} />`; break;
     case 'trends': screen = html`<${Trends} />`; break;
-    case 'settings': screen = html`<${SettingsTemp} toast=${setToastText} />`; break;
-    default: screen = html`<${Today} onLog=${openLog} />`;
+    case 'settings': screen = html`<${Settings} toast=${setToastText} />`; break;
+    case 'manage': screen = html`<${Manage} key=${route[1]} category=${route[1]} />`; break;
+    case 'report': screen = html`<${Report} from=${route[1]} to=${route[2]} />`; break;
+    default: screen = html`<${Today} onLog=${openLog} toast=${setToastText} />`;
   }
   return html`
     <div class="app">

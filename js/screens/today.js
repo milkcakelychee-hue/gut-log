@@ -3,6 +3,8 @@ import { html, useState } from '../vendor/preact-htm.js';
 import { Chip, AddChip, Segmented, AddItemDialog, Nav, toggle } from '../ui.js';
 import { Glyph, Icon, PLUS, entryGlyph } from '../icons.js';
 import { FACTORS, FACTOR_SPAN, FACTOR_HINT, dateKey, enDate, summarizeDay, dayStatus, entryTitle, entrySub, timeOf } from '../rules.js';
+import { exportBackup } from '../export.js';
+import { backupAge } from './settings.js';
 import { useStore, entriesOn, factorView, editFactors, submitFactors, startEditFactors, cancelEditFactors, itemsOf, addItem } from '../store.js';
 
 const STEPS = [
@@ -11,7 +13,7 @@ const STEPS = [
   ['ก่อนนอน เลือกปัจจัยวันนี้', 'การนอน ความเครียด ประจำเดือน อาหารเสี่ยง']
 ];
 
-export function Today({ onLog }) {
+export function Today({ onLog, toast }) {
   const s = useStore();
   const [adding, setAdding] = useState(false);
   const today = dateKey();
@@ -19,6 +21,7 @@ export function Today({ onLog }) {
   const sum = summarizeDay(entries);
   const status = dayStatus(entries);
   const firstTime = s.entries.length === 0;
+  const backupDue = needsBackup(s);
 
   return html`
     <main class="page has-actions">
@@ -29,6 +32,12 @@ export function Today({ onLog }) {
         </div>
         ${status && html`<div class=${'status-pill ' + status.tone}>${status.text}</div>`}
       </div>
+
+      ${backupDue !== null && html`
+        <div class="backup-banner">
+          <span>${backupDue === Infinity ? 'ยังไม่เคยสำรองข้อมูล' : 'ไม่ได้สำรองข้อมูลมา ' + backupDue + ' วัน'}</span>
+          <button type="button" onClick=${async () => { try { if (await exportBackup()) toast('สำรองข้อมูลแล้ว'); } catch (e) { toast('สำรองไม่สำเร็จ'); } }}>สำรองตอนนี้</button>
+        </div>`}
 
       ${firstTime ? html`
         <section class="card onboard">
@@ -173,4 +182,14 @@ function MealsInput({ value, locked, onChange }) {
         <span>มื้อ</span>
       </label>
     </div>`;
+}
+
+// เตือนสำรองข้อมูล: มีบันทึกมาแล้ว 7 วันขึ้นไป และไม่ได้สำรองเกิน 7 วัน  คืน null ถ้ายังไม่ต้องเตือน
+function needsBackup(s) {
+  if (!s.entries.length) return null;
+  const first = Math.min(...s.entries.map((e) => e.createdAt || Date.now()));
+  if (Date.now() - first < 7 * 86400000) return null;
+  const age = backupAge(s.settings);
+  if (age === null) return Infinity;
+  return age >= 7 ? age : null;
 }

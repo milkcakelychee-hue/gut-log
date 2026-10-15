@@ -338,6 +338,75 @@ h1, h2 { line-height: 1.4; }
 .wk-row.line { border-top: 1px solid var(--line-soft); }
 .wk-row.muted { color: var(--muted); }
 
+/* ---------- ตั้งค่า ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.set-title { margin: 0 4px; font-size: 14px; font-weight: 500; color: var(--text-2); }
+.set-card { padding: 0 16px; }
+.set-row { width: 100%; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 0; border: none; background: none; text-align: left; font-size: 16px; }
+.set-row + .set-row, .set-note + .set-row { border-top: 1px solid var(--line-soft); }
+.set-text { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.set-sub { font-size: 13px; color: var(--text-2); line-height: 1.4; }
+.set-value { font-size: 14px; color: var(--text-2); white-space: nowrap; }
+.set-note { font-size: 13px; color: var(--text-2); line-height: 1.5; padding: 14px 0; }
+.date-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-2); }
+.date-field input { height: 48px; border: 1px solid var(--line); border-radius: 14px; background: #FFFFFF; padding: 0 10px; font-size: 16px; color: var(--text); width: 100%; min-width: 0; }
+.backup-banner { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; background: var(--symptom-bg); font-size: 14px; }
+.backup-banner span { flex: 1; }
+.backup-banner button { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--accent); background: #FFFFFF; color: var(--accent-dark); font-size: 14px; font-weight: 600; white-space: nowrap; }
+
+/* ---------- จัดการรายการ ---------- */
+.manage { padding-top: calc(var(--safe-top) + 12px); padding-bottom: calc(var(--nav-pad-bottom) + 40px); }
+.cat-scroll { display: flex; gap: 8px; overflow-x: auto; margin-right: -20px; padding-right: 20px; scrollbar-width: none; touch-action: pan-x; }
+.cat-scroll::-webkit-scrollbar { display: none; }
+.cat-pill { flex-shrink: 0; min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 15px; white-space: nowrap; border: 1px solid var(--line); background: #FFFFFF; }
+.cat-pill.on { border: none; background: var(--accent); color: #FFFFFF; font-weight: 600; }
+.mg-card { padding: 0 6px 0 8px; }
+.mg-row { display: flex; align-items: center; gap: 4px; min-height: 56px; background: #FFFFFF; }
+.mg-row + .mg-row { border-top: 1px solid var(--line-soft); }
+.mg-row.dragging { background: var(--accent-soft); border-radius: 12px; }
+.mg-handle { width: 36px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--muted); touch-action: none; cursor: grab; flex-shrink: 0; }
+.mg-name { flex: 1; font-size: 16px; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mg-empty { padding: 16px 8px; font-size: 14px; color: var(--text-2); }
+.new-badge { font-size: 12px; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-dark); font-weight: 600; }
+.icon-btn { width: 44px; height: 44px; border: none; background: transparent; color: var(--text-2); display: flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0; }
+
+/* ---------- สรุป PDF ---------- */
+.report-bar { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; padding: calc(var(--safe-top) + 8px) 16px 8px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.report { background: #FFFFFF; margin: 12px; padding: 18px 16px; border-radius: 16px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 16px; font-size: 13px; line-height: 1.5; color: var(--text); }
+.rp-head h1 { font-size: 20px; font-weight: 600; }
+.rp-head div { color: var(--text-2); }
+.rp-sec { display: flex; flex-direction: column; gap: 6px; break-inside: avoid; }
+.rp-sec h2 { font-size: 15px; font-weight: 600; }
+.rp-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; }
+.rp-stats div { display: flex; flex-direction: column; }
+.rp-stats span { color: var(--text-2); font-size: 12px; }
+.rp-stats b { font-size: 15px; font-weight: 600; }
+.rp-small { font-size: 11px; color: var(--text-2); }
+.rp-months { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.rp-mtitle { font-weight: 600; margin-bottom: 4px; }
+.rp-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.rp-cal .wd { text-align: center; font-size: 10px; color: var(--text-2); }
+.rc { position: relative; height: 30px; border-radius: 4px; border: 1px solid #EFEAE0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+.rc i { font-style: normal; font-size: 8px; color: var(--text-2); }
+.rc b { font-size: 11px; }
+.rc em { position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; border-radius: 50%; background: var(--alert-dot); }
+.rc.out { border: none; color: #D6CFBF; font-size: 9px; }
+.rp-pain { display: grid; gap: 1px; align-items: end; height: 72px; border-bottom: 1px solid var(--line); }
+.rp-factors .trend-card { border: none; padding: 0; gap: 8px; }
+.rp-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.rp-table th, .rp-table td { text-align: left; vertical-align: top; padding: 4px 4px; border-bottom: 1px solid var(--line-soft); }
+.rp-table th { color: var(--text-2); font-weight: 500; }
+.rp-table td:first-child { white-space: nowrap; }
+
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #FFFFFF !important; overflow: visible !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print, .bottom, .toast { display: none !important; }
+  .report { margin: 0; padding: 0; border: none; border-radius: 0; }
+  .rp-table tr { break-inside: avoid; }
+}
+
 .placeholder { padding: 20px; text-align: center; color: var(--text-2); font-size: 15px; }
 .dev-tools { display: flex; flex-direction: column; gap: 10px; }
 

@@ -1,7 +1,7 @@
 // โหลดข้อมูลทั้งหมดไว้ในหน่วยความจำ (ข้อมูลคนเดียว ขนาดเล็ก) แล้วเขียนลง IndexedDB ทุกครั้งที่แก้
 import { useState, useEffect } from './vendor/preact-htm.js';
 import * as db from './db.js';
-import { DEFAULT_LISTS, FACTORS, FACTOR_KEYS, ZONE_ORDER, uid } from './rules.js';
+import { DEFAULT_LISTS, FACTORS, FACTOR_KEYS, ZONE_ORDER, prefs, uid } from './rules.js';
 
 export const state = { ready: false, entries: [], days: {}, items: [], settings: {} };
 const listeners = new Set();
@@ -37,6 +37,7 @@ export async function init() {
   state.days = Object.fromEntries(days.map((d) => [d.date, normalizeDay(d)]));
   state.items = items;
   state.settings = Object.fromEntries(settings.map((s) => [s.key, s.value]));
+  applyPrefs();
   state.ready = true;
   emit();
   // ขอให้เบราว์เซอร์ไม่ลบข้อมูลเองเมื่อพื้นที่เหลือน้อย
@@ -142,7 +143,7 @@ export async function addItem(category, rawName) {
     return existing;
   }
   const order = Math.max(-1, ...itemsOf(category, { includeHidden: true }).map((i) => i.order)) + 1;
-  const item = { id: uid(), category, name, order, hidden: false, isNew: true };
+  const item = { id: uid(), category, name, order, hidden: false, createdAt: Date.now() };
   await putItem(item);
   return item;
 }
@@ -153,11 +154,46 @@ export async function putItem(item) {
   emit();
 }
 
+export async function deleteItem(id) {
+  await db.del('items', id);
+  state.items = state.items.filter((i) => i.id !== id);
+  emit();
+}
+
+// ids = ลำดับใหม่ของรายการที่แสดงอยู่ในหมวดนั้น
+export async function reorderItems(ids) {
+  const changed = ids.map((id, order) => ({ ...state.items.find((i) => i.id === id), order }));
+  await db.putMany('items', changed);
+  state.items = state.items.map((i) => changed.find((c) => c.id === i.id) || i);
+  emit();
+}
+
 // ---------- ตั้งค่า ----------
+function applyPrefs() {
+  prefs.be = state.settings.yearFormat !== 'ce';
+}
+
 export async function setSetting(key, value) {
   await db.put('settings', { key, value });
   state.settings = { ...state.settings, [key]: value };
+  applyPrefs();
   emit();
+}
+
+// ---------- สำรอง / นำเข้า ----------
+export function snapshot() {
+  const settings = Object.entries(state.settings).filter(([k]) => k !== 'lastBackup').map(([key, value]) => ({ key, value }));
+  return { app: 'gut-log', version: 1, exportedAt: new Date().toISOString(), entries: state.entries, days: Object.values(state.days), items: state.items, settings };
+}
+
+// แทนที่ข้อมูลทั้งหมดด้วยไฟล์สำรอง
+export async function restoreAll(data) {
+  await db.clearAll();
+  await db.putMany('entries', data.entries || []);
+  await db.putMany('days', data.days || []);
+  await db.putMany('items', data.items || []);
+  await db.putMany('settings', (data.settings || []).concat([{ key: 'lastBackup', value: Date.now() }]));
+  await init();
 }
 
 // ---------- ใช้ตอนทดสอบ ----------
