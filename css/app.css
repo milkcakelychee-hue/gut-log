@@ -308,6 +308,32 @@ h1, h2 { line-height: 1.4; }
 .add-back { display: flex; gap: 10px; }
 .dash-btn { height: 56px; border: 1.5px dashed #A9B9AD; border-radius: 18px; background: transparent; color: var(--accent-dark); font-size: 16px; font-weight: 500; }
 
+/* ---------- แนวโน้ม ---------- */
+.trends { gap: 18px; }
+.trend-card { border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.b-dot { position: absolute; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #FFFFFF; }
+.week-axis { flex: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 12px; color: var(--text-2); }
+.pain-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; align-items: end; height: 120px; border-bottom: 1px solid var(--line); padding: 0 4px; }
+.pw-col { display: flex; flex-direction: column; align-items: center; gap: 4px; justify-content: flex-end; height: 100%; }
+.pw-bar { width: 100%; max-width: 26px; border-radius: 6px 6px 2px 2px; }
+.pain-week-axis { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; padding: 0 4px; text-align: center; font-size: 12px; color: var(--text-2); }
+.bar-track { flex: 1; height: 12px; border-radius: 6px; background: #F0ECE3; overflow: hidden; display: flex; }
+.bar-track > span { border-radius: 6px; }
+.bar-track.thin { height: 10px; border-radius: 5px; }
+.cmp-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.cmp-row > span:first-child { width: 56px; color: var(--text-2); }
+.cmp-row > :last-child { width: 28px; text-align: right; }
+.strip { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 3px; }
+.strip-cell { height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text); }
+.strip-cell.missing { border: 1px dashed #D6CFBF; }
+.strip-cell.future { background: #F7F4EE; color: var(--muted); }
+.pain-month { display: grid; gap: 2px; align-items: end; height: 90px; border-bottom: 1px solid var(--line); }
+.wk-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 6px; font-size: 14px; padding: 10px 0; }
+.wk-row > span:not(:first-child) { text-align: right; }
+.wk-row.head { font-size: 12px; color: var(--text-2); padding: 0 0 6px; border-bottom: 1px solid var(--line-soft); }
+.wk-row.line { border-top: 1px solid var(--line-soft); }
+.wk-row.muted { color: var(--muted); }
+
 .placeholder { padding: 20px; text-align: center; color: var(--text-2); font-size: 15px; }
 .dev-tools { display: flex; flex-direction: column; gap: 10px; }
 
