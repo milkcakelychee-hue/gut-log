@@ -1,6 +1,6 @@
 // เก็บไฟล์แอปไว้ในเครื่องเพื่อใช้ออฟไลน์
 // เปลี่ยน VERSION ทุกครั้งที่อัปเดตแอป
-const VERSION = 'v1-d1';
+const VERSION = 'v1-d2';
 const CACHE = 'gut-log-' + VERSION;
 const FILES = [
   './',

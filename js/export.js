@@ -79,7 +79,7 @@ export async function readBackup(file) {
     throw new Error('อ่านไฟล์ไม่ได้ ต้องเป็นไฟล์ .json ที่ได้จากปุ่ม "สำรองข้อมูล"');
   }
   if (!data || data.app !== 'gut-log' || !Array.isArray(data.entries)) {
-    throw new Error('ไฟล์นี้ไม่ใช่ไฟล์สำรองของแอปบันทึกท้อง');
+    throw new Error('ไฟล์นี้ไม่ใช่ไฟล์สำรองของแอป Gut log');
   }
   const when = data.exportedAt ? new Date(data.exportedAt) : null;
   return {
