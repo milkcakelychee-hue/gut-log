@@ -1,7 +1,7 @@
 // ส่วนประกอบที่ใช้ซ้ำ (ตาม SPEC.md ข้อ 4)
 import { html, useState, useEffect, useRef, useLayoutEffect } from './vendor/preact-htm.js';
 import { AMOUNT_PATHS, BRISTOL_PATHS, Glyph, Icon, TAB_PATHS } from './icons.js';
-import { AMOUNTS, BRISTOL_SHORT, ZONES_LEFT, ZONES_MID, ZONES_RIGHT, painWord } from './rules.js';
+import { AMOUNTS, BRISTOL_SHORT, ZONES_LEFT, ZONES_MID, ZONES_RIGHT, PAIN_DESC, PAIN_SHORT } from './rules.js';
 
 const cx = (...a) => a.filter(Boolean).join(' ');
 const toggle = (arr, v) => (arr.includes(v) ? arr.filter((x) => x !== v) : arr.concat([v]));
@@ -25,12 +25,12 @@ export const PainScale = ({ value, onChange }) => html`
   <div class="log-section">
     <div class="section-head">
       <h2 class="h2-lg">${'ปวดท้องแค่ไหน'}</h2>
-      <div class="pain-word">${value === null ? 'ยังไม่เลือก' : value + ' · ' + painWord(value)}</div>
+      <div class="pain-word" aria-live="polite" aria-label=${value === null ? 'ยังไม่เลือก' : 'ปวด ' + value + ' ' + PAIN_DESC[value]}>${value === null ? 'ยังไม่เลือก' : value + ' · ' + PAIN_SHORT[value]}</div>
     </div>
     <div class="pain">
       ${Array.from({ length: 11 }, (_, n) => html`
         <button type="button" class=${value === n ? 'on' : ''} aria-pressed=${value === n ? 'true' : 'false'}
-          aria-label=${'ปวด ' + n + ' ' + painWord(n)} onClick=${() => onChange(value === n ? null : n)}>${n}</button>`)}
+          aria-label=${'ปวด ' + n + ' ' + PAIN_DESC[n]} onClick=${() => onChange(value === n ? null : n)}>${n}</button>`)}
     </div>
     <div class="scale-ends"><span>0 ไม่ปวด</span><span>10 ปวดมากที่สุด</span></div>
   </div>`;
