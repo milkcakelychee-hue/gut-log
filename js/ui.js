@@ -1,7 +1,7 @@
 // ส่วนประกอบที่ใช้ซ้ำ (ตาม SPEC.md ข้อ 4)
 import { html, useState, useEffect, useRef, useLayoutEffect } from './vendor/preact-htm.js';
-import { BRISTOL_PATHS, Glyph, Icon, TAB_PATHS } from './icons.js';
-import { BRISTOL_SHORT, ZONES_LEFT, ZONES_MID, ZONES_RIGHT, painWord } from './rules.js';
+import { AMOUNT_PATHS, BRISTOL_PATHS, Glyph, Icon, TAB_PATHS } from './icons.js';
+import { AMOUNTS, BRISTOL_SHORT, ZONES_LEFT, ZONES_MID, ZONES_RIGHT, painWord } from './rules.js';
 
 const cx = (...a) => a.filter(Boolean).join(' ');
 const toggle = (arr, v) => (arr.includes(v) ? arr.filter((x) => x !== v) : arr.concat([v]));
@@ -57,6 +57,22 @@ export const BristolGrid = ({ value, onChange }) => html`
       <div style="border-top: 3px solid #D9B48F">1–2 ท้องผูก</div>
       <div style="border-top: 3px solid #6A9471">3–4 ปกติ</div>
       <div style="border-top: 3px solid #A9B6D3">5–7 ค่อนข้างเหลว</div>
+    </div>
+  </div>`;
+
+// ปริมาณ: undefined = ยังไม่เลือก, 0 = ไม่ได้ดู, หรือ key ใน AMOUNTS
+export const AmountGrid = ({ value, onChange }) => html`
+  <div class="log-section">
+    <h2 class="h2-lg">ปริมาณ</h2>
+    <div class="amount">
+      ${AMOUNTS.map(([key, label]) => html`
+        <button type="button" class=${value === key ? 'on' : ''} aria-pressed=${value === key ? 'true' : 'false'}
+          aria-label=${'ปริมาณ' + label} onClick=${() => onChange(value === key ? undefined : key)}>
+          <${Glyph} d=${AMOUNT_PATHS[key]} size=${34} />
+          <span>${label}</span>
+        </button>`)}
+      <button type="button" class=${cx('skip', value === 0 && 'on')} aria-pressed=${value === 0 ? 'true' : 'false'}
+        onClick=${() => onChange(value === 0 ? undefined : 0)}>ไม่ได้ดู</button>
     </div>
   </div>`;
 

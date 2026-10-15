@@ -23,7 +23,7 @@ export function makeSample(daysBack = 30) {
       const pain = bad ? pick([0, 2, 3, 5, 6, 7]) : pick([0, 0, 0, 1, 2, 3]);
       entries.push({
         id: uid(), kind: 'bowel', datetime: `${date}T${pad(hour)}:${pad(Math.floor(Math.random() * 60))}`, date,
-        bristol, when: null, pain, zones: pain ? some(ZONE_ORDER, 1.5) : [],
+        bristol, amount: pick(['little', 'medium', 'medium', 'lots', null]), when: null, pain, zones: pain ? some(ZONE_ORDER, 1.5) : [],
         symptoms: pain ? some(DEFAULT_LISTS.bowel_symptom, 1.5) : [], note: '', createdAt: Date.now(), updatedAt: Date.now()
       });
     }

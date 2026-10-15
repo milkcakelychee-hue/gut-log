@@ -1,5 +1,5 @@
 // ส่งออก CSV, สำรองข้อมูลเป็นไฟล์ JSON และอ่านไฟล์สำรอง
-import { WHEN_LABEL, dateKey, factorLabel, timeOf } from './rules.js';
+import { AMOUNT_LABEL, WHEN_LABEL, dateKey, factorLabel, timeOf } from './rules.js';
 import { state, dayOf, snapshot, setSetting } from './store.js';
 
 // ส่งไฟล์ออกทางแผ่นแชร์ของ iPhone (บันทึกลง Files / iCloud Drive ได้) ถ้าไม่มีให้ดาวน์โหลดแทน
@@ -34,7 +34,7 @@ const cell = (v) => {
 // แถวละ 1 บันทึก + ปัจจัยของวันนั้น (วันที่มีแต่ปัจจัยได้ 1 แถว)
 export function buildCsv(from, to) {
   const inRange = (d) => (!from || d >= from) && (!to || d <= to);
-  const head = ['วันที่', 'เวลา', 'ประเภท', 'Bristol', 'ช่วงเวลา', 'ปวด (0-10)', 'ตำแหน่ง', 'อาการ', 'โน้ต',
+  const head = ['วันที่', 'เวลา', 'ประเภท', 'Bristol', 'ปริมาณ', 'ช่วงเวลา', 'ปวด (0-10)', 'ตำแหน่ง', 'อาการ', 'โน้ต',
     'การนอน', 'ความเครียด', 'ประจำเดือน', 'มื้ออาหารเสี่ยง', 'อาหารเสี่ยง', 'ส่งปัจจัยแล้ว'];
   const factorCells = (date) => {
     const d = dayOf(date);
@@ -47,14 +47,14 @@ export function buildCsv(from, to) {
   const rows = [];
   const entries = state.entries.filter((e) => inRange(e.date)).sort((a, b) => a.datetime.localeCompare(b.datetime));
   entries.forEach((e) => rows.push([
-    e.date, timeOf(e.datetime), e.kind === 'bowel' ? 'ขับถ่าย' : 'อาการ (ไม่ได้ถ่าย)', e.bristol ?? '',
+    e.date, timeOf(e.datetime), e.kind === 'bowel' ? 'ขับถ่าย' : 'อาการ (ไม่ได้ถ่าย)', e.bristol ?? '', e.amount ? AMOUNT_LABEL[e.amount] : '',
     e.kind === 'symptom' && e.when ? WHEN_LABEL[e.when] : '', e.pain ?? '', (e.zones || []).join(', '),
     (e.symptoms || []).join(', '), e.note || '', ...factorCells(e.date)
   ]));
   const withEntries = new Set(entries.map((e) => e.date));
   Object.values(state.days)
     .filter((d) => d.submittedAt && inRange(d.date) && !withEntries.has(d.date))
-    .forEach((d) => rows.push([d.date, '', 'ปัจจัยอย่างเดียว', '', '', '', '', '', '', ...factorCells(d.date)]));
+    .forEach((d) => rows.push([d.date, '', 'ปัจจัยอย่างเดียว', '', '', '', '', '', '', '', ...factorCells(d.date)]));
   rows.sort((a, b) => (a[0] + a[1]).localeCompare(b[0] + b[1]));
   // ใส่ BOM ให้ Excel อ่านภาษาไทยถูก
   return '﻿' + [head, ...rows].map((r) => r.map(cell).join(',')).join('\r\n');

@@ -1,6 +1,6 @@
 // หน้าบันทึกใหม่ / แก้ไขบันทึก (ขับถ่าย | มีอาการ)
 import { html, useState, useRef, useEffect } from '../vendor/preact-htm.js';
-import { BristolGrid, PainScale, BellyMap, Chip, AddChip, Confirm, AddItemDialog, cx, toggle } from '../ui.js';
+import { AmountGrid, BristolGrid, PainScale, BellyMap, Chip, AddChip, Confirm, AddItemDialog, cx, toggle } from '../ui.js';
 import { Icon, CHECK } from '../icons.js';
 import { WHEN, chipTime, dateKey, nowLocal, timeOf } from '../rules.js';
 import { useStore, itemsOf, addItem, saveEntry, deleteEntry } from '../store.js';
@@ -15,6 +15,7 @@ export function LogSheet({ init, onClose }) {
   const [kind, setKind] = useState(entry ? entry.kind : init.mode);
   const [datetime, setDatetime] = useState(startTime);
   const [bristol, setBristol] = useState(entry && entry.kind === 'bowel' ? (entry.bristol ?? 0) : undefined);
+  const [amount, setAmount] = useState(entry && entry.kind === 'bowel' && entry.amount ? entry.amount : undefined);
   const [pain, setPain] = useState(entry ? entry.pain ?? null : null);
   const [zones, setZones] = useState(entry ? entry.zones || [] : []);
   const [symB, setSymB] = useState(entry && entry.kind === 'bowel' ? entry.symptoms || [] : []);
@@ -27,7 +28,7 @@ export function LogSheet({ init, onClose }) {
   const [closing, setClosing] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
 
-  const form = { kind, datetime, bristol, pain, zones, symB, symS, when, note: note.trim() };
+  const form = { kind, datetime, bristol, amount, pain, zones, symB, symS, when, note: note.trim() };
   const key = JSON.stringify(form);
   const [savedKey, setSavedKey] = useState(entry ? key : null);
   const dirty = key !== savedKey;
@@ -35,7 +36,7 @@ export function LogSheet({ init, onClose }) {
   const showDone = isSaved && justSaved;
 
   const hasContent = kind === 'bowel'
-    ? bristol !== undefined || pain !== null || zones.length || symB.length || note.trim()
+    ? bristol !== undefined || amount !== undefined || pain !== null || zones.length || symB.length || note.trim()
     : pain !== null || zones.length || symS.length || note.trim();
   const canSave = dirty && hasContent;
 
@@ -65,6 +66,7 @@ export function LogSheet({ init, onClose }) {
       kind,
       datetime,
       bristol: kind === 'bowel' && bristol ? bristol : null,
+      amount: kind === 'bowel' && amount ? amount : null,
       when: kind === 'symptom' ? when : null,
       pain,
       zones,
@@ -127,6 +129,7 @@ export function LogSheet({ init, onClose }) {
 
           ${kind === 'bowel' ? html`
             <${BristolGrid} value=${bristol} onChange=${setBristol} />
+            <${AmountGrid} value=${amount} onChange=${setAmount} />
             <${PainScale} value=${pain} onChange=${setPain} />
             <${BellyMap} title="ปวดตรงไหน" zones=${zones} onChange=${setZones} />
             ${symptomSection('อาการร่วม')}

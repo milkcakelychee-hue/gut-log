@@ -3,7 +3,7 @@ import { html, useState } from '../vendor/preact-htm.js';
 import { AddItemDialog } from '../ui.js';
 import { Glyph, Icon, CHEVRON_LEFT, entryGlyph } from '../icons.js';
 import {
-  GROUP_FILL, WHEN_LABEL, bristolGroup, dateKey, entryTitle, factorLabel, mealsText, summarizeDay, thLongDate, timeOf
+  AMOUNT_LABEL, GROUP_FILL, WHEN_LABEL, bristolGroup, dateKey, entryTitle, factorLabel, mealsText, summarizeDay, thLongDate, timeOf
 } from '../rules.js';
 import { useStore, entriesOn, dayOf, factorView, editFactors, startEditFactors, itemsOf, addItem } from '../store.js';
 import { Factors } from './today.js';
@@ -94,6 +94,7 @@ function EntryCard({ entry: e, onEdit }) {
   const tint = e.kind === 'symptom' ? '#F3EDE2' : e.bristol ? GROUP_FILL[bristolGroup(e.bristol)] : '#EFEAE0';
   const time = timeOf(e.datetime) + (e.kind === 'symptom' && e.when && e.when !== 'now' ? ' · ' + WHEN_LABEL[e.when] : '');
   const details = [
+    e.kind === 'bowel' ? ['ปริมาณ', e.amount ? AMOUNT_LABEL[e.amount] : 'ไม่ได้ระบุ'] : null,
     e.zones && e.zones.length ? ['ตำแหน่ง', e.zones.join(', ')] : null,
     e.kind === 'bowel' && e.symptoms && e.symptoms.length ? ['อาการร่วม', e.symptoms.join(', ')] : null,
     e.note ? ['โน้ต', e.note] : null

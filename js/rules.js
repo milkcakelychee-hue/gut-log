@@ -3,6 +3,10 @@
 export const BRISTOL_SHORT = ['แข็ง เป็นเม็ด', 'แท่ง ขรุขระ', 'แท่ง มีรอยแตก', 'นิ่ม ผิวเรียบ', 'ก้อนนิ่ม', 'เละ', 'เป็นน้ำ'];
 export const BRISTOL_TITLE = ['แข็ง เป็นเม็ด', 'แท่ง ขรุขระเป็นก้อน', 'แท่ง ผิวมีรอยแตก', 'นิ่ม ผิวเรียบ', 'ก้อนนิ่ม ขอบชัด', 'เละ ขอบไม่ชัด', 'เป็นน้ำ'];
 
+// ปริมาณอุจจาระ (เฉพาะขับถ่าย) เก็บเป็น key, null = ไม่ได้ดู/ข้าม
+export const AMOUNTS = [['little', 'น้อย'], ['medium', 'ปานกลาง'], ['lots', 'มาก']];
+export const AMOUNT_LABEL = Object.fromEntries(AMOUNTS);
+
 // ซ้ายของจอ = ขวาของเรา
 export const ZONES_RIGHT = ['ใต้ซี่โครงขวา', 'ข้างขวา', 'ล่างขวา'];
 export const ZONES_LEFT = ['ใต้ซี่โครงซ้าย', 'ข้างซ้าย', 'ล่างซ้าย'];
@@ -120,6 +124,7 @@ export function entryTitle(e) {
 export function entrySub(e) {
   const parts = [];
   if (e.kind === 'symptom' && e.when && e.when !== 'now') parts.push(WHEN_LABEL[e.when]);
+  if (e.kind === 'bowel' && e.amount) parts.push('ปริมาณ' + AMOUNT_LABEL[e.amount]);
   if (e.pain === 0) parts.push('ไม่ปวด');
   else if (e.pain) parts.push('ปวด ' + e.pain);
   if ((e.zones || []).length) parts.push(e.zones.join(', '));

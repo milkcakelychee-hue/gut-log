@@ -1,7 +1,7 @@
 // สรุปสำหรับพบแพทย์: แสดงบนจอ แล้วพิมพ์/บันทึกเป็น PDF ผ่านหน้าพิมพ์ของ iPhone
 import { html } from '../vendor/preact-htm.js';
 import {
-  GROUP_FILL, TH_DAYS_SHORT, TH_MONTHS, TH_MONTHS_SHORT, WHEN_LABEL, bristolGroup, dateKey, parseLocal, thYear, timeOf
+  AMOUNT_LABEL, GROUP_FILL, TH_DAYS_SHORT, TH_MONTHS, TH_MONTHS_SHORT, WHEN_LABEL, bristolGroup, dateKey, parseLocal, thYear, timeOf
 } from '../rules.js';
 import { useStore } from '../store.js';
 import { datesFrom, dayData, fmt1, summarize, topSymptoms } from '../stats.js';
@@ -106,7 +106,7 @@ export function Report({ from, to }) {
           <tbody>
             ${entries.map((e) => html`<tr>
               <td>${thDate(e.date).replace(/ \d{4}$/, '')} ${timeOf(e.datetime)}</td>
-              <td>${e.kind === 'bowel' ? (e.bristol ? 'ขับถ่าย แบบ ' + e.bristol : 'ขับถ่าย') : 'อาการ' + (e.when && e.when !== 'now' ? ' (' + WHEN_LABEL[e.when] + ')' : '')}</td>
+              <td>${e.kind === 'bowel' ? ((e.bristol ? 'ขับถ่าย แบบ ' + e.bristol : 'ขับถ่าย') + (e.amount ? ' · ' + AMOUNT_LABEL[e.amount] : '')) : 'อาการ' + (e.when && e.when !== 'now' ? ' (' + WHEN_LABEL[e.when] + ')' : '')}</td>
               <td>${e.pain ?? '–'}</td>
               <td>${(e.zones || []).join(', ')}</td>
               <td>${(e.symptoms || []).join(', ')}</td>
