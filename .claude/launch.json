@@ -4,7 +4,19 @@
     {
       "name": "gut-app",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["tools/devserver.py", "."],
+      "runtimeArgs": [
+        "tools/devserver.py",
+        "."
+      ],
+      "port": 5173
+    },
+    {
+      "name": "gut-app-mac",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "tools/devserver.py",
+        "."
+      ],
       "port": 5173
     }
   ]
