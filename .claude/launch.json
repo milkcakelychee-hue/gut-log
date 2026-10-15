@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gut-app",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["tools/devserver.py", "."],
+      "port": 5173
+    }
+  ]
+}
