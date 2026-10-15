@@ -159,6 +159,6 @@ export function AddItemDialog({ title, placeholder, onAdd, onCancel }) {
 }
 
 export function Toast({ text, onDone }) {
-  useEffect(() => { const t = setTimeout(onDone, 1800); return () => clearTimeout(t); }, [text]);
+  useEffect(() => { const t = setTimeout(onDone, 3200); return () => clearTimeout(t); }, [text]);
   return html`<div class="toast" role="status">${text}</div>`;
 }

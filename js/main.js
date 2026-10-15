@@ -50,9 +50,14 @@ function SettingsTemp({ toast }) {
       </section>
     </main>
     <div class="bottom"><${Nav} active="settings" /></div>
-    ${ask === 'sample' && html`<${Confirm} title="ใส่ข้อมูลตัวอย่าง?" message="จะเพิ่มบันทึกสุ่มย้อนหลัง 30 วัน (ไม่แตะวันนี้) ปัจจัยของวันเหล่านั้นจะถูกแทนที่"
+    ${ask === 'sample' && html`<${Confirm} title="ใส่ข้อมูลตัวอย่าง?" message="จะเพิ่มบันทึกสุ่มย้อนหลัง 30 วัน ไม่แตะวันนี้ จึงยังไม่เห็นในหน้าวันนี้ จะเห็นในหน้าประวัติและแนวโน้ม (ช่วง ข และ ค)"
       confirmLabel="ใส่ข้อมูล" onCancel=${() => setAsk(null)}
-      onConfirm=${async () => { await replaceData(makeSample()); setAsk(null); toast('ใส่ข้อมูลตัวอย่างแล้ว'); }} />`}
+      onConfirm=${async () => {
+        const data = makeSample();
+        await replaceData(data);
+        setAsk(null);
+        toast('เพิ่มข้อมูล ' + data.days.length + ' วันย้อนหลังแล้ว (' + data.entries.length + ' บันทึก) · จะเห็นในหน้าประวัติ');
+      }} />`}
     ${ask === 'wipe' && html`<${Confirm} title="ล้างข้อมูลทั้งหมด?" message="บันทึก ปัจจัย และรายการที่เพิ่มเองจะหายทั้งหมด กู้คืนไม่ได้"
       confirmLabel="ล้างทั้งหมด" danger onCancel=${() => setAsk(null)}
       onConfirm=${async () => { await wipeAll(); setAsk(null); toast('ล้างข้อมูลแล้ว'); }} />`}
