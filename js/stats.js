@@ -70,30 +70,39 @@ export function topSymptoms(days, by, limit = 4) {
   return Object.entries(count).sort((a, b) => b[1] - a[1]).slice(0, limit);
 }
 
-// ปัจจัยกับอาการปวด: ปวดสูงสุดเฉลี่ยของวันที่มีปัจจัย เทียบกับวันอื่น (เฉพาะวันที่ส่งปัจจัยแล้ว)
-const FACTOR_TESTS = [
-  { label: (n) => `อาหารเสี่ยง (${n} วัน) · รวมวันถัดไป`, test: (day) => day.riskMeals > 0, nextDay: true },
-  { label: (n) => `ความเครียด "สูง" (${n} วัน)`, test: (day) => day.stress === 'high' },
-  { label: (n) => `การนอน "น้อย" (${n} วัน)`, test: (day) => day.sleep === 'low' },
-  { label: (n) => `มีประจำเดือน (${n} วัน)`, test: (day) => day.period === 'light' || day.period === 'heavy' }
-];
+// สรุปปัจจัย: นับจากวันที่ส่งปัจจัยแล้วเท่านั้น
+export function factorSummary(days) {
+  const sent = days.filter((d) => d.day.submittedAt);
+  const tally = (key) => {
+    const c = {};
+    sent.forEach((d) => { const v = d.day[key]; if (v) c[v] = (c[v] || 0) + 1; });
+    return c;
+  };
+  const periodDates = sent.filter((d) => d.day.period === 'light' || d.day.period === 'heavy').map((d) => d.date);
+  const foodDays = sent.filter((d) => d.day.riskMeals > 0);
+  const foods = {};
+  sent.forEach((d) => (d.day.riskFoods || []).forEach((f) => { foods[f] = (foods[f] || 0) + 1; }));
+  return {
+    sent: sent.length,
+    total: days.filter((d) => !d.future).length,
+    sleep: tally('sleep'),
+    stress: tally('stress'),
+    period: tally('period'),
+    periodDates,
+    noFood: sent.filter((d) => d.day.riskMeals === 0).length,
+    foodDays: foodDays.length,
+    meals: foodDays.reduce((a, d) => a + d.day.riskMeals, 0),
+    foods: Object.entries(foods).sort((a, b) => b[1] - a[1])
+  };
+}
 
-export function factorPain(days) {
-  const sent = days.filter((d) => d.day.submittedAt && d.info.maxPain !== null);
-  const rows = [];
-  FACTOR_TESTS.forEach((f) => {
-    const yes = [];
-    const no = [];
-    sent.forEach((d) => {
-      let pain = d.info.maxPain;
-      // อาหารมักส่งผลช้า ดูปวดสูงสุดของวันนั้นหรือวันถัดไป
-      if (f.nextDay) {
-        const next = dayData(addDays(d.date, 1)).info.maxPain;
-        if (next !== null) pain = Math.max(pain, next);
-      }
-      (f.test(d.day) ? yes : no).push(pain);
-    });
-    if (yes.length && no.length) rows.push({ label: f.label(yes.length), a: avg(yes), b: avg(no) });
+// รวมวันที่ติดกันเป็นช่วง เช่น ["2026-10-11","2026-10-12","2026-10-13","2026-10-20"] → [["2026-10-11","2026-10-13"],["2026-10-20","2026-10-20"]]
+export function dateRuns(dates) {
+  const runs = [];
+  dates.slice().sort().forEach((d) => {
+    const last = runs[runs.length - 1];
+    if (last && addDays(last[1], 1) === d) last[1] = d;
+    else runs.push([d, d]);
   });
-  return rows.sort((x, y) => (y.a - y.b) - (x.a - x.b));
+  return runs;
 }

@@ -2,13 +2,13 @@
 import { html, useState } from '../vendor/preact-htm.js';
 import { Nav } from '../ui.js';
 import { Icon, CHEVRON_LEFT, CHEVRON_RIGHT } from '../icons.js';
-import { GROUP_FILL, TH_DAYS_SHORT, TH_MONTHS, TH_MONTHS_SHORT, bristolGroup, dateKey, parseLocal, thYear } from '../rules.js';
-import { useStore } from '../store.js';
-import { MIN_DAYS, addDays, datesFrom, dayData, factorPain, fmt1, recordedDayCount, summarize, topSymptoms } from '../stats.js';
+import { FACTORS, GROUP_FILL, TH_DAYS_SHORT, TH_MONTHS, TH_MONTHS_SHORT, bristolGroup, dateKey, parseLocal, thYear } from '../rules.js';
+import { useStore, itemsOf } from '../store.js';
+import { MIN_DAYS, addDays, dateRuns, datesFrom, dayData, factorSummary, fmt1, recordedDayCount, summarize, topSymptoms } from '../stats.js';
 
 const view = { mode: 'week', weekOffset: 0, month: null };
 const DOT_FILL = { c: '#C9935F', n: '#47704F', l: '#6B82B8' };
-const DISCLAIMER = 'คำนวณจากที่บันทึกเอง ใช้ดูแนวโน้มเท่านั้น ไม่ใช่การวินิจฉัย ยิ่งบันทึกนาน (3–4 สัปดาห์ขึ้นไป) ยิ่งเห็นรูปแบบชัดขึ้น';
+const DISCLAIMER = 'สรุปจากที่บันทึกเอง ใช้ดูแนวโน้มเท่านั้น ไม่ใช่การวินิจฉัย ยิ่งบันทึกนาน (3–4 สัปดาห์ขึ้นไป) ยิ่งเห็นรูปแบบชัดขึ้น';
 
 export function Trends() {
   useStore();
@@ -83,7 +83,8 @@ function Week({ offset, setOffset }) {
       <${BristolDots} days=${days} />
       <${PainWeek} days=${days} />
       <${SymptomBars} title="อาการท้องที่พบบ่อย" rows=${topSymptoms(days, 'days')} max=${7} unit=${(v) => v + '/7 วัน'} />
-      <${FactorCard} days=${days} />
+      <${FactorSummary} days=${days} />
+      <p class="hint" style="line-height: 1.5; margin: 0 4px">${DISCLAIMER}</p>
     `}`;
 }
 
@@ -165,22 +166,48 @@ function SymptomBars({ title, rows, max, unit }) {
     </section>`;
 }
 
-function FactorCard({ days }) {
-  const rows = factorPain(days);
+const LEVEL_COLOR = {
+  sleep: { good: '#A9CBB0', ok: '#C9DFCC', low: '#EBC2AC' },
+  stress: { low: '#C9DFCC', mid: '#F1E3C8', high: '#EBC2AC' }
+};
+
+function FactorSummary({ days }) {
+  const f = factorSummary(days);
+  const rows = itemsOf('factor').map((r) => r.key);
+  const dist = (key) => {
+    const opts = FACTORS[key].opts;
+    const counted = opts.filter(([k]) => f[key][k]);
+    if (!counted.length) return html`<span class="hint">ไม่ได้บันทึก</span>`;
+    return html`
+      <div class="dist-bar">${counted.map(([k]) => html`<span style=${`flex: ${f[key][k]}; background: ${LEVEL_COLOR[key][k]}`}></span>`)}</div>
+      <span class="hint">${counted.map(([k, label]) => label + ' ' + f[key][k]).join(' · ')} วัน</span>`;
+  };
+  const runText = (runs) => runs.map(([a, b]) => {
+    const da = parseLocal(a);
+    const db = parseLocal(b);
+    const m = TH_MONTHS_SHORT[db.getMonth()];
+    return a === b ? db.getDate() + ' ' + m : da.getDate() + '–' + db.getDate() + ' ' + m;
+  }).join(', ');
+
   return html`
     <section class="card trend-card" style="gap: 14px">
-      <div style="display: flex; flex-direction: column; gap: 2px">
-        <h2 class="h2">ปัจจัยกับอาการปวด</h2>
-        <span class="hint">ปวดสูงสุดเฉลี่ยในวันที่มีปัจจัย เทียบกับวันอื่น</span>
+      <div style="display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap">
+        <h2 class="h2">สรุปปัจจัย</h2>
+        <span class="hint">· ส่งแล้ว ${f.sent}/${f.total} วัน</span>
       </div>
-      ${rows.length === 0 && html`<div class="hint" style="font-size: 14px">ยังเทียบไม่ได้ ต้องมีทั้งวันที่มีและไม่มีปัจจัยนั้น (นับเฉพาะวันที่ส่งปัจจัยแล้ว)</div>`}
-      ${rows.map((f) => html`
-        <div style="display: flex; flex-direction: column; gap: 6px">
-          <span style="font-size: 15px; font-weight: 500">${f.label}</span>
-          <div class="cmp-row"><span>วันนั้น</span><span class="bar-track thin"><span style=${`width: ${f.a * 10}%; background: #B86A45`}></span></span><b>${fmt1(f.a)}</b></div>
-          <div class="cmp-row"><span>วันอื่น</span><span class="bar-track thin"><span style=${`width: ${f.b * 10}%; background: #B7C3BA`}></span></span><span>${fmt1(f.b)}</span></div>
+      ${f.sent === 0 ? html`<div class="hint" style="font-size: 14px">ช่วงนี้ยังไม่ได้ส่งปัจจัย</div>` : rows.map((key) => html`
+        <div class="fs-row">
+          <b>${FACTORS[key].name}</b>
+          ${key === 'sleep' || key === 'stress' ? dist(key)
+            : key === 'period' ? html`<span class="hint">${f.periodDates.length
+                ? 'มา ' + f.periodDates.length + ' วัน (' + runText(dateRuns(f.periodDates)) + ')' + (f.period.heavy ? ' · มามาก ' + f.period.heavy + ' วัน' : '')
+                : f.period.none ? 'ไม่มา' : 'ไม่ได้บันทึก'}</span>`
+            : html`
+              <span class="hint">${f.foodDays
+                ? f.foodDays + ' วัน รวม ' + f.meals + ' มื้อ' + (f.noFood ? ' · ไม่มี ' + f.noFood + ' วัน' : '')
+                : f.noFood ? 'ไม่มีวันที่กินอาหารเสี่ยง' : 'ไม่ได้บันทึก'}</span>
+              ${f.foods.length > 0 && html`<div class="tags">${f.foods.map(([name, n]) => html`<span class="mini-tag">${name} ${n} วัน</span>`)}</div>`}`}
         </div>`)}
-      <p class="hint" style="line-height: 1.5">${DISCLAIMER}</p>
     </section>`;
 }
 
@@ -267,5 +294,6 @@ function Month({ month, setMonth }) {
     </section>
 
     <${SymptomBars} title="อาการที่พบบ่อยเดือนนี้" rows=${syms} max=${syms.length ? syms[0][1] : 1} unit=${(v) => v + ' ครั้ง'} />
-    <${FactorCard} days=${days} />`;
+    <${FactorSummary} days=${days} />
+    <p class="hint" style="line-height: 1.5; margin: 0 4px">${DISCLAIMER}</p>`;
 }
