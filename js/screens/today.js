@@ -77,7 +77,7 @@ export function Today({ onLog, toast }) {
             </button>`)}
       </section>
 
-      <${Factors} date=${today} firstTime=${firstTime} onAddFood=${() => setAdding(true)} />
+      <${Factors} date=${today} onAddFood=${() => setAdding(true)} />
     </main>
 
     <div class="bottom with-actions">
@@ -104,7 +104,7 @@ export function Today({ onLog, toast }) {
 }
 
 // ปัจจัยรายวัน: เลือก → กดส่ง (วันละ 1 ชุด) → แก้ไขได้  ใช้ซ้ำในหน้ารายละเอียดวัน
-export function Factors({ date, firstTime, onAddFood }) {
+export function Factors({ date, onAddFood }) {
   const v = factorView(date);
   const isToday = date === dateKey();
   const rows = itemsOf('factor');
@@ -121,13 +121,21 @@ export function Factors({ date, firstTime, onAddFood }) {
   if (v.locked) tag = html`<span class="tag done">${sentLabel.trim()}</span>`;
   else if (v.editing && v.submittedAt) tag = html`<span class="tag">กำลังแก้ไข</span>`;
   else if (v.filled) tag = html`<span class="tag">ยังไม่ส่ง</span>`;
-  else if (firstTime) tag = html`<span class="hint">เลือกตอนไหนก็ได้</span>`;
+
+  // บอกว่ากรอกวันละครั้ง ไม่ต้องรีบ และแก้ได้ตลอด (เฉพาะหน้าวันนี้)
+  const intro = !isToday ? null
+    : v.locked ? 'อยากเปลี่ยนค่า กด "แก้ไข" ด้านล่างได้ตลอด'
+    : v.editing && v.submittedAt ? 'เปลี่ยนแล้วกด "บันทึกการแก้ไข" ด้านล่าง'
+    : 'กรอกวันละครั้ง ตอนไหนก็ได้ แนะนำก่อนนอน ส่งแล้วยังแก้ได้';
 
   return html`
     <section class="section">
-      <div class="section-head">
-        <h2 class="h2">${isToday ? 'ปัจจัยวันนี้' : 'ปัจจัย'}</h2>
-        ${tag}
+      <div class="section-intro">
+        <div class="section-head">
+          <h2 class="h2">${isToday ? 'ปัจจัยวันนี้' : 'ปัจจัย'}</h2>
+          ${tag}
+        </div>
+        ${intro && html`<p class="hint">${intro}</p>`}
       </div>
       <div class=${'card factors' + (v.locked ? ' locked' : '')}>
         ${rows.map((r) => html`

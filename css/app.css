@@ -62,6 +62,8 @@ h1, h2 { line-height: 1.4; }
 .hint { font-size: 13px; color: var(--text-2); }
 .section { display: flex; flex-direction: column; gap: 10px; }
 .section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.section-intro { display: flex; flex-direction: column; gap: 4px; }
+.section-intro .hint { line-height: 1.45; }
 
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; }
 
