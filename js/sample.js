@@ -14,8 +14,8 @@ export function makeSample(daysBack = 30) {
     d.setDate(d.getDate() - back);
     const date = dateKey(d);
     const stress = pick(['low', 'mid', 'high', null]);
-    const riskFood = pick(['none', 'none', 'some', 'lots']);
-    const bad = stress === 'high' || riskFood === 'lots';
+    const riskMeals = pick([0, 0, 1, 2, 3]);
+    const bad = stress === 'high' || riskMeals >= 2;
     const n = pick([0, 1, 1, 1, 2, 2, 3]);
     for (let i = 0; i < n; i++) {
       const hour = 6 + Math.floor(Math.random() * 15);
@@ -37,7 +37,7 @@ export function makeSample(daysBack = 30) {
     }
     days.push({
       date, sleep: pick(['low', 'ok', 'ok', 'good', null]), stress, period: pick(['none', 'none', 'none', 'light', null]),
-      riskFood, riskFoods: riskFood === 'none' ? [] : some(DEFAULT_LISTS.risk_food, 1.5)
+      riskMeals, riskFoods: riskMeals ? some(DEFAULT_LISTS.risk_food, 1.5) : [], submittedAt: Date.now(), draft: null
     });
   }
   return { entries, days };

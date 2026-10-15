@@ -21,7 +21,14 @@ export const FACTORS = {
   sleep: { name: 'การนอน', opts: [['low', 'น้อย'], ['ok', 'พอดี'], ['good', 'ดีมาก']] },
   stress: { name: 'ความเครียด', opts: [['low', 'ต่ำ'], ['mid', 'กลาง'], ['high', 'สูง']] },
   period: { name: 'ประจำเดือน', opts: [['none', 'ไม่มา'], ['light', 'มาน้อย'], ['heavy', 'มามาก']] },
-  riskFood: { name: 'อาหารเสี่ยง', opts: [['none', 'ไม่มี'], ['some', 'กลาง'], ['lots', 'จัดเต็ม']] }
+  riskFood: { name: 'อาหารเสี่ยง' }
+};
+// ประเมินช่วงไหน (แสดงใต้ชื่อแถว)
+export const FACTOR_SPAN = { sleep: 'เมื่อคืน', stress: 'ทั้งวัน', period: 'วันนี้', riskFood: 'ทั้งวัน' };
+// เกณฑ์ที่แสดงใต้แถวเมื่อเลือกแล้ว
+export const FACTOR_HINT = {
+  sleep: { low: 'ไม่ถึง 6 ชม. หรือตื่นกลางดึกบ่อย', ok: '6–8 ชม. ตื่นมาพอไหว', good: 'หลับยาว ตื่นมาสดชื่น' },
+  stress: { low: 'สบาย ๆ ไม่มีเรื่องกังวล', mid: 'มีเรื่องให้คิด แต่รับมือได้', high: 'กังวลหรือกดดัน จนรู้สึกถึงตัวหรือท้อง' }
 };
 export const FACTOR_KEYS = ['sleep', 'stress', 'period', 'riskFood'];
 

@@ -34,7 +34,7 @@ export async function init() {
   }
   const [entries, days, settings] = await Promise.all([db.getAll('entries'), db.getAll('days'), db.getAll('settings')]);
   state.entries = entries;
-  state.days = Object.fromEntries(days.map((d) => [d.date, d]));
+  state.days = Object.fromEntries(days.map((d) => [d.date, normalizeDay(d)]));
   state.items = items;
   state.settings = Object.fromEntries(settings.map((s) => [s.key, s.value]));
   state.ready = true;
@@ -69,15 +69,61 @@ export async function deleteEntry(id) {
 }
 
 // ---------- ปัจจัยรายวัน ----------
-export const emptyDay = (date) => ({ date, sleep: null, stress: null, period: null, riskFood: null, riskFoods: [] });
+// ค่าที่ส่งแล้วอยู่ในตัว record (submittedAt) ส่วนที่กำลังเลือก/แก้อยู่ใน draft
+// riskMeals: null = ยังไม่เลือก, 0 = ไม่มี, 1+ = จำนวนมื้อ
+export const FACTOR_FIELDS = ['sleep', 'stress', 'period', 'riskMeals', 'riskFoods'];
+export const emptyDay = (date) => ({ date, sleep: null, stress: null, period: null, riskMeals: null, riskFoods: [], submittedAt: null, draft: null });
+
+// ข้อมูลรุ่นแรก (riskFood ระดับ 3 ขั้น ไม่มีการส่ง) → รูปแบบใหม่
+function normalizeDay(d) {
+  const day = { ...emptyDay(d.date), ...d };
+  if (d.riskFood !== undefined) {
+    if (day.riskMeals === null) day.riskMeals = { none: 0, some: 1, lots: 2 }[d.riskFood] ?? null;
+    delete day.riskFood;
+  }
+  if (day.submittedAt === null && !day.draft && pickFactors(day).filled) day.submittedAt = Date.now();
+  return day;
+}
+
+export function pickFactors(src) {
+  const v = {};
+  FACTOR_FIELDS.forEach((k) => { v[k] = k === 'riskFoods' ? (src[k] || []).slice() : src[k] ?? null; });
+  v.filled = FACTOR_FIELDS.some((k) => (k === 'riskFoods' ? v[k].length > 0 : v[k] !== null));
+  return v;
+}
+
 export const dayOf = (date) => state.days[date] || emptyDay(date);
 
-export async function updateDay(date, patch) {
-  const next = { ...dayOf(date), ...patch };
+// ค่าที่หน้าจอควรแสดง: ร่างถ้ามี ไม่งั้นค่าที่ส่งแล้ว
+export function factorView(date) {
+  const day = dayOf(date);
+  return { ...pickFactors(day.draft || day), submittedAt: day.submittedAt, editing: !!day.draft, locked: !!day.submittedAt && !day.draft };
+}
+
+async function putDay(next) {
   await db.put('days', next);
-  state.days = { ...state.days, [date]: next };
+  state.days = { ...state.days, [next.date]: next };
   emit();
 }
+
+export async function editFactors(date, patch) {
+  const day = dayOf(date);
+  const base = pickFactors(day.draft || day);
+  delete base.filled;
+  await putDay({ ...day, draft: { ...base, ...patch } });
+}
+
+export async function submitFactors(date) {
+  const day = dayOf(date);
+  if (!day.draft) return;
+  const v = pickFactors(day.draft);
+  delete v.filled;
+  await putDay({ ...day, ...v, draft: null, submittedAt: Date.now() });
+}
+
+// เริ่มแก้ไขค่าที่ส่งแล้ว / ยกเลิกการแก้ไข
+export async function startEditFactors(date) { await editFactors(date, {}); }
+export async function cancelEditFactors(date) { await putDay({ ...dayOf(date), draft: null }); }
 
 // ---------- รายการที่ผู้ใช้แก้ได้ ----------
 export function itemsOf(category, { includeHidden = false } = {}) {
@@ -125,7 +171,7 @@ export async function replaceData({ entries, days }) {
   await db.putMany('entries', entries);
   await db.putMany('days', days);
   state.entries = state.entries.filter((e) => !entries.some((x) => x.id === e.id)).concat(entries);
-  days.forEach((d) => { state.days[d.date] = d; });
+  days.forEach((d) => { state.days[d.date] = normalizeDay(d); });
   state.days = { ...state.days };
   emit();
 }

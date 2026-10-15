@@ -2,8 +2,8 @@
 import { html, useState } from '../vendor/preact-htm.js';
 import { Chip, AddChip, Segmented, AddItemDialog, Nav, toggle } from '../ui.js';
 import { Glyph, Icon, PLUS, entryGlyph } from '../icons.js';
-import { FACTORS, dateKey, enDate, summarizeDay, dayStatus, entryTitle, entrySub, timeOf } from '../rules.js';
-import { useStore, entriesOn, dayOf, updateDay, itemsOf, addItem } from '../store.js';
+import { FACTORS, FACTOR_SPAN, FACTOR_HINT, dateKey, enDate, summarizeDay, dayStatus, entryTitle, entrySub, timeOf } from '../rules.js';
+import { useStore, entriesOn, factorView, editFactors, submitFactors, startEditFactors, cancelEditFactors, itemsOf, addItem } from '../store.js';
 
 const STEPS = [
   ['หลังเข้าห้องน้ำ แตะ "+ ขับถ่าย"', 'เลือกลักษณะ ระดับปวด แล้วกดบันทึก'],
@@ -87,41 +87,90 @@ export function Today({ onLog }) {
       <${AddItemDialog} title="เพิ่มอาหารเสี่ยง" placeholder="เช่น ชานม" onCancel=${() => setAdding(false)}
         onAdd=${async (name) => {
           const item = await addItem('risk_food', name);
-          const day = dayOf(today);
-          if (item && !day.riskFoods.includes(item.name)) await updateDay(today, { riskFoods: day.riskFoods.concat([item.name]) });
+          const v = factorView(today);
+          if (item && !v.riskFoods.includes(item.name)) await editFactors(today, { riskFoods: v.riskFoods.concat([item.name]) });
           setAdding(false);
         }} />`}
   `;
 }
 
-// ปัจจัยรายวัน ใช้ซ้ำในหน้ารายละเอียดวันได้
+// ปัจจัยรายวัน: เลือก → กดส่ง (วันละ 1 ชุด) → แก้ไขได้  ใช้ซ้ำในหน้ารายละเอียดวัน
 export function Factors({ date, firstTime, onAddFood }) {
-  const day = dayOf(date);
+  const v = factorView(date);
+  const isToday = date === dateKey();
   const rows = itemsOf('factor');
   const showFoods = rows.some((r) => r.key === 'riskFood');
   const foods = itemsOf('risk_food').map((i) => i.name);
-  const shownFoods = foods.concat(day.riskFoods.filter((f) => !foods.includes(f)));
+  const shownFoods = foods.concat(v.riskFoods.filter((f) => !foods.includes(f)));
+  const set = (patch) => editFactors(date, patch);
+  const sentAt = v.submittedAt ? new Date(v.submittedAt) : null;
+  const sentLabel = sentAt
+    ? '✓ ส่งแล้ว ' + (dateKey(sentAt) === date ? String(sentAt.getHours()).padStart(2, '0') + ':' + String(sentAt.getMinutes()).padStart(2, '0') : '')
+    : '';
+
+  let tag = null;
+  if (v.locked) tag = html`<span class="tag done">${sentLabel.trim()}</span>`;
+  else if (v.editing && v.submittedAt) tag = html`<span class="tag">กำลังแก้ไข</span>`;
+  else if (v.filled) tag = html`<span class="tag">ยังไม่ส่ง</span>`;
+  else if (firstTime) tag = html`<span class="hint">เลือกตอนไหนก็ได้</span>`;
+
   return html`
     <section class="section">
       <div class="section-head">
-        <h2 class="h2">${date === dateKey() ? 'ปัจจัยวันนี้' : 'ปัจจัย'}</h2>
-        ${firstTime && html`<span class="hint">เลือกตอนไหนก็ได้</span>`}
+        <h2 class="h2">${isToday ? 'ปัจจัยวันนี้' : 'ปัจจัย'}</h2>
+        ${tag}
       </div>
-      <div class="card factors">
+      <div class=${'card factors' + (v.locked ? ' locked' : '')}>
         ${rows.map((r) => html`
-          <div class="factor-row">
-            <div class="factor-label">${r.name}</div>
-            <${Segmented} label=${r.name} opts=${FACTORS[r.key].opts} value=${day[r.key]} onChange=${(v) => updateDay(date, { [r.key]: v })} />
+          <div class="factor-block">
+            <div class="factor-row">
+              <div class="factor-label">${r.name}<span>${FACTOR_SPAN[r.key]}</span></div>
+              ${r.key === 'riskFood'
+                ? html`<${MealsInput} value=${v.riskMeals} locked=${v.locked} onChange=${(n) => set({ riskMeals: n })} />`
+                : html`<${Segmented} label=${r.name} opts=${FACTORS[r.key].opts} value=${v[r.key]} onChange=${(x) => !v.locked && set({ [r.key]: x })} />`}
+            </div>
+            ${FACTOR_HINT[r.key] && v[r.key] && html`<div class="factor-hint">${FACTOR_HINT[r.key][v[r.key]]}</div>`}
           </div>`)}
-        ${showFoods && html`
+        ${showFoods && (v.locked
+          ? html`<div class="risk-foods"><div class="hint">${v.riskFoods.length ? 'กิน: ' + v.riskFoods.join(', ') : 'ไม่ได้ระบุว่ากินอะไร'}</div></div>`
+          : html`
           <div class="risk-foods" style=${rows.length ? '' : 'border-top: none; padding-top: 0'}>
-            <div class="hint">มีอะไรบ้าง (ไม่บังคับ)</div>
+            <div class="hint">${isToday ? 'วันนี้' : 'วันนั้น'}กินอะไรไปบ้าง (เลือกได้หลายข้อ รวมทุกมื้อ)</div>
             <div class="chips">
               ${shownFoods.map((f) => html`
-                <${Chip} tight on=${day.riskFoods.includes(f)} onClick=${() => updateDay(date, { riskFoods: toggle(day.riskFoods, f) })}>${f}<//>`)}
+                <${Chip} tight on=${v.riskFoods.includes(f)} onClick=${() => set({ riskFoods: toggle(v.riskFoods, f) })}>${f}<//>`)}
               <${AddChip} tight onClick=${onAddFood} />
             </div>
-          </div>`}
+          </div>`)}
+        <div class="factor-actions">
+          ${v.locked
+            ? html`<button type="button" class="btn-plain" onClick=${() => startEditFactors(date)}>แก้ไข</button>`
+            : v.editing && v.submittedAt
+              ? html`
+                <button type="button" class="btn-plain" style="flex: 1" onClick=${() => cancelEditFactors(date)}>ยกเลิก</button>
+                <button type="button" class="btn-solid" style="flex: 2" onClick=${() => submitFactors(date)}>บันทึกการแก้ไข</button>`
+              : html`<button type="button" class="btn-solid" disabled=${!v.filled} onClick=${() => submitFactors(date)}>${isToday ? 'ส่งปัจจัยวันนี้' : 'บันทึกปัจจัยวันนั้น'}</button>`}
+        </div>
       </div>
     </section>`;
+}
+
+// อาหารเสี่ยง: "ไม่มี" หรือกรอกจำนวนมื้อเอง
+function MealsInput({ value, locked, onChange }) {
+  const onInput = (e) => {
+    const digits = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
+    e.target.value = digits;
+    onChange(digits === '' ? null : Number(digits));
+  };
+  return html`
+    <div class="seg two" role="group" aria-label="อาหารเสี่ยง">
+      <button type="button" class=${value === 0 ? 'on' : ''} aria-pressed=${value === 0 ? 'true' : 'false'}
+        onClick=${() => !locked && onChange(value === 0 ? null : 0)}>ไม่มี</button>
+      <label class=${'meals' + (value > 0 ? ' on' : '')}>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="–" aria-label="จำนวนมื้อที่กินอาหารเสี่ยง"
+          value=${value > 0 ? String(value) : ''} disabled=${locked} onInput=${onInput}
+          onFocus=${(e) => e.target.select()} />
+        <span>มื้อ</span>
+      </label>
+    </div>`;
 }
