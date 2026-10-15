@@ -1,6 +1,6 @@
 // เก็บไฟล์แอปไว้ในเครื่องเพื่อใช้ออฟไลน์
 // เปลี่ยน VERSION ทุกครั้งที่อัปเดตแอป
-const VERSION = 'v1-e1';
+const VERSION = 'v1-e2';
 const CACHE = 'gut-log-' + VERSION;
 const FILES = [
   './',
@@ -38,7 +38,12 @@ const FILES = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: 'reload' = ดึงจากเซิร์ฟเวอร์จริง ไม่ใช้สำเนาเก่าที่เบราว์เซอร์จำไว้ (GitHub ให้จำได้ 10 นาที)
+  e.waitUntil(
+    caches.open(CACHE)
+      .then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' }))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {
@@ -56,7 +61,7 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.open(CACHE).then(async (cache) => {
       const cached = await cache.match(req, { ignoreSearch: true });
-      const fresh = fetch(req)
+      const fresh = fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
         .then((res) => { if (res.ok) cache.put(req, res.clone()); return res; })
         .catch(() => cached);
       return cached || fresh;
